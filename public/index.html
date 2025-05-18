@@ -1,1 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>In-App Notifications</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <button id="bell">🔔</button>
+  <span id="badge"></span>
+
+  <script>
+    const userId = 'user123'; // replace with actual user ID
+    const socket = io();
+
+    socket.emit('subscribe', userId);
+
+    socket.on('notification', ({ title, message }) => {
+      // Browser Notification
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body: message });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(status => {
+          if (status === 'granted') {
+            new Notification(title, { body: message });
+          }
+        });
+      }
+      // Update badge count
+      const badge = document.getElementById('badge');
+      badge.textContent = (parseInt(badge.textContent || '0') + 1).toString();
+    });
+
+    document.getElementById('bell').onclick = () => {
+      document.getElementById('badge').textContent = '';
+    };
+  </script>
+</body>
+</html>
 
